@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.0.5.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.7.RELEASE'
+}
+
+group 'UserSideProcrastinationBot'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    // JNA
+    compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.0.0'
+    compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.0'
+
+    implementation 'org.springframework.boot:spring-boot-dependencies:2.0.5.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    compile("com.fasterxml.jackson.core:jackson-databind")
+
+    compile files('libs/ProcrastinationBot-1.0.jar')
+}
