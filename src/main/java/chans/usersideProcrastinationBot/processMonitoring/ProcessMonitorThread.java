@@ -28,7 +28,7 @@ public class ProcessMonitorThread extends Thread {
 
 
     // TODO ribbon list or something for this
-    static String procrastinationBotServerUrl = "http://localhost:8080/procrastinationBotServer";
+    static String procrastinationBotServerUrl = "http://localhost:8081/procrastinationBotServer";
     static String endpointName = "/postUserInfo";
     static final UUID testUserId = UUID.fromString("1d782e3f-ad5f-46ce-92c8-3994cc1fdf8b");
 
@@ -81,7 +81,6 @@ public class ProcessMonitorThread extends Thread {
     protected void handleUserActionLogged() throws Exception{
         UserInfoDto userInfoDto = new UserInfoDto();
 
-        float n = 1_23.1;
         userInfoDto.setMainProcessName(new String(mainProcessName));
 
         //TODO
@@ -92,5 +91,6 @@ public class ProcessMonitorThread extends Thread {
         ResponseEntity response = restTemplate.postForEntity(procrastinationBotServerUrl+endpointName, postRequest, UserInfoDto.class);
         if(response.getStatusCode() != HttpStatus.ACCEPTED)
             throw new Exception("Error while trying to post to "+procrastinationBotServerUrl+endpointName);
+        System.out.println(response.getBody());
     }
 }
