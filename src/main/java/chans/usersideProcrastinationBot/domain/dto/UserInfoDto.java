@@ -17,11 +17,9 @@ public class UserInfoDto implements Serializable {
     @NotNull
     private UUID userUniqueId;
 
-    private String userName;
-
-    private String userPassword;
-
     private String mainProcessName;
 
-    private long startProcessTime;
+    private String executableName;
+
+    private long recordedTime;
 }
