@@ -41,7 +41,7 @@ public class ProcessMonitorThread extends Thread {
 
     // Change when building for backend web stuff
     boolean isLocal = true;
-    public static String localDirectoryPath;
+    public static String localDirectoryPath = System.getProperty("user.home")+"\\"+".procrastinationBot";
     BufferedWriter localFileWriter;
     String currentDateForFile;
 
@@ -166,7 +166,6 @@ public class ProcessMonitorThread extends Thread {
     }
 
     public void setUpLocalWrite() throws Exception{
-        this.localDirectoryPath = System.getProperty("user.home")+"\\"+".procrastinationBot";
         File localDirectory = new File(this.localDirectoryPath);
         if( !localDirectory.exists() ){
             localDirectory.mkdir();
@@ -177,8 +176,6 @@ public class ProcessMonitorThread extends Thread {
         logFile.createNewFile();
 
         this.localFileWriter = Files.newBufferedWriter(logFile.toPath(), StandardOpenOption.APPEND);
-        this.localFileWriter.write("Testing with the 1.8 way");
-        this.localFileWriter.flush();
         this.currentDateForFile = LocalDate.now().toString();
     }
 }

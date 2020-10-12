@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 public class LocalAnalytics {
 
     @Data
-    protected static class LoggedAnalytic{
+    public static class LoggedAnalytic{
 
         LocalTime loggedTime;
         String fullWindowText;
@@ -33,7 +33,7 @@ public class LocalAnalytics {
     }
 
     @Data
-    protected static class DailyLog{
+    public static class DailyLog{
         List<LoggedAnalytic> orderedAnalytics;
         LocalDate daysDate;
 
@@ -64,7 +64,7 @@ public class LocalAnalytics {
     protected static LocalTime stopTime;
 
     protected static void loadUsageFile(LocalDate dateToLoad) throws Exception{
-        String filePath = ProcessMonitorThread.localDirectoryPath+ dateToLoad.toString();
+        String filePath = ProcessMonitorThread.localDirectoryPath+ "\\"+dateToLoad.toString();
         File fileToLoad = new File(filePath);
         if(!fileToLoad.exists()){
             throw new Exception("Failed to find the file named "+filePath);
@@ -73,8 +73,14 @@ public class LocalAnalytics {
         DailyLog dailyLog = new DailyLog(dateToLoad);
         try(Stream<String> stream = Files.lines(Paths.get(filePath))){
             stream.forEach( line -> {
-                LoggedAnalytic lineAsAnalytic = new LoggedAnalytic(line);
-                dailyLog.getOrderedAnalytics().add(lineAsAnalytic);
+                try{
+                    LoggedAnalytic lineAsAnalytic = new LoggedAnalytic(line);
+                    dailyLog.getOrderedAnalytics().add(lineAsAnalytic);
+                }
+                catch(Exception e){
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
             });
         }
         catch(Exception e){
@@ -86,19 +92,24 @@ public class LocalAnalytics {
     public static void loadPeriod(LocalDate startDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime){
         try{
             loadUsageFile(startDate);
-            startDate.plusDays(1);
+            startDate = startDate.plusDays(1);
             if( endDate != null ){
-                while(endDate.isAfter(startDate)){
+                while(endDate.isAfter(startDate) || endDate.isEqual(startDate)){
                     loadUsageFile(startDate);
-                    startDate.plusDays(1);
+                    startDate = startDate.plusDays(1);
                 }
+            }
+            if( loadedLogs.isEmpty()){
+                return;
             }
         }
         catch(Exception e){
             //TODO pop up an error window if we are using the graphics
             System.out.println(e.getMessage());
             e.printStackTrace();
+            return;
         }
+
         // Only applies to the startDate
         if(beginTime != null){
             startTime = beginTime;
@@ -110,7 +121,7 @@ public class LocalAnalytics {
         }
     }
 
-    public List<LoggedAnalytic> getLoggedAnalytics(){
+    public static List<LoggedAnalytic> getLoggedAnalytics(){
         LinkedList<LoggedAnalytic> combinedAnalytics = new LinkedList<LoggedAnalytic>();
         for(DailyLog dailyLog : loadedLogs){
             combinedAnalytics.addAll(dailyLog.getOrderedAnalytics());
