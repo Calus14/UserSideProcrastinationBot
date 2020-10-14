@@ -91,13 +91,16 @@ public class LocalAnalytics {
 
     public static void loadPeriod(LocalDate startDate, LocalDate endDate, LocalTime beginTime, LocalTime endTime){
         try{
-            loadUsageFile(startDate);
-            startDate = startDate.plusDays(1);
-            if( endDate != null ){
-                while(endDate.isAfter(startDate) || endDate.isEqual(startDate)){
+            while(endDate.isAfter(startDate) || endDate.isEqual(startDate)){
+                try{
                     loadUsageFile(startDate);
-                    startDate = startDate.plusDays(1);
                 }
+                catch(Exception e){
+                    System.out.println("Failed to load file for date "+startDate.toString());
+                    System.out.println(e.getMessage());
+                }
+
+                startDate = startDate.plusDays(1);
             }
             if( loadedLogs.isEmpty()){
                 return;

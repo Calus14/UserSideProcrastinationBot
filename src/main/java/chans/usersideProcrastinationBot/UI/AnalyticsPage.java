@@ -119,6 +119,8 @@ public class AnalyticsPage  extends GridPane {
     };
 
     private AnalyticsPage(){
+        this.setPrefSize(RootUI.INSTANCE.getWidth(), RootUI.INSTANCE.getWidth());
+
         this.setUpTextFields();
         this.setButtonActionHandlers();
 
@@ -194,7 +196,12 @@ public class AnalyticsPage  extends GridPane {
             public void handle(ActionEvent event) {
                 LocalAnalytics.loadPeriod( startDate, endDate, startTime, endTime);
                 PieChartDisplay.Instance.consumeLocalAnalytics();
-                AnalyticsPage.INSTANCE.add(PieChartDisplay.Instance.getDisplayNode(), 0, 3, 4,4);
+                if(!AnalyticsPage.INSTANCE.getChildren().contains(PieChartDisplay.Instance.getDisplayNode())){
+                    AnalyticsPage.INSTANCE.add(PieChartDisplay.Instance.getDisplayNode(), 0, 3, 4,4);
+                }
+                else{
+                    PieChartDisplay.Instance.updatePieChart();
+                }
             }
         });
 

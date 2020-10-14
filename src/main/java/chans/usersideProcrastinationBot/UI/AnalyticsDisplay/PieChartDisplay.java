@@ -7,12 +7,12 @@ import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
-import javafx.scene.input.MouseEvent;
-import org.springframework.cglib.core.Local;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PieChartDisplay implements AnalyticDisplay {
 
@@ -21,6 +21,9 @@ public class PieChartDisplay implements AnalyticDisplay {
 
     // Knowing how many logged readings there our lets us calculate the percentage
     protected double totalLogs;
+    protected final int numberOfProgramsToShow =10;
+
+    protected final PieChart chart = new PieChart();
 
     public static PieChartDisplay Instance= new PieChartDisplay();
 
@@ -42,36 +45,42 @@ public class PieChartDisplay implements AnalyticDisplay {
         this.totalLogs = loadedLogsInOrder.size();
     }
 
-    @Override
-    public Node getDisplayNode() {
+    public void updatePieChart(){
         ArrayList<PieChart.Data> simplifiedData = new ArrayList<PieChart.Data>();
-        for(Map.Entry<String, List<String>> entry : this.executableToWindowsTitleMap.entrySet()){
-            simplifiedData.add(new PieChart.Data(entry.getKey(),
-                                                ( ((float)entry.getValue().size()) / totalLogs) ) );
+
+        // List from highest to lowest used executables in our logs
+        List<Map.Entry> sortedExecutables = this.executableToWindowsTitleMap.entrySet().stream()
+                .sorted( (entry1, entry2) -> {return Integer.compare(entry2.getValue().size(), entry1.getValue().size());})
+                .collect(Collectors.toList());
+
+        double totalPercent = 0.f;
+
+        for(Map.Entry<String, List<String>> entry : sortedExecutables){
+
+            // the last entry in the chart will be "other"
+            if(simplifiedData.size() == numberOfProgramsToShow-1){
+                simplifiedData.add(new PieChart.Data("Other", 100.f-totalPercent));
+                break;
+            }
+
+            totalPercent = (100.f * (float)entry.getValue().size()) / totalLogs;
+            simplifiedData.add(new PieChart.Data(entry.getKey(), totalPercent));
         }
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(simplifiedData);
-        PieChart chart = new PieChart(pieChartData);
+        chart.setPrefSize(450, 300);
+        chart.setData(pieChartData);
+        chart.setLegendVisible(true);
+        chart.setLabelsVisible(true);
         chart.setTitle("Program Usage");
 
         final Label caption = new Label("");
         caption.setTextFill(Color.DARKORANGE);
         caption.setStyle("-fx-font: 24 arial;");
+    }
 
-        for (final PieChart.Data data : chart.getData()) {
-            data.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED,
-                    e -> {
-                        double total = 0;
-                        for (PieChart.Data d : chart.getData()) {
-                            total += d.getPieValue();
-                        }
-                        caption.setTranslateX(e.getSceneX());
-                        caption.setTranslateY(e.getSceneY());
-                        String text = String.format("%.1f%%", 100*data.getPieValue()/total) ;
-                        caption.setText(text);
-                    }
-            );
-        }
-
+    @Override
+    public Node getDisplayNode() {
+        updatePieChart();
         return chart;
     }
 }
